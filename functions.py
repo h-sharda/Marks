@@ -14,7 +14,7 @@ def extract_table_data(email, table):
     rows = table.find_elements(By.TAG_NAME, "tr")
     data = []
     
-    for row in rows[1:]:  # Skip header
+    for row in rows[1:]:  
         try:
             columns = row.find_elements(By.TAG_NAME, "td")
             if columns:
@@ -31,19 +31,19 @@ def extract_table_data(email, table):
 
 def setup_driver(driver_path):
     chrome_options = Options()
-    chrome_options.add_argument('--disable-gpu')  # Disable GPU hardware acceleration
-    chrome_options.add_argument('--no-sandbox')  # Disables the sandbox for Chrome (necessary for some environments)
-    chrome_options.add_argument('--disable-dev-shm-usage')  # Solves limited resource problems in some environments
-    chrome_options.add_argument('--disable-extensions')  # Disable extensions (if any)
-    chrome_options.add_argument('--disable-logging')  # Disables logging output
-    chrome_options.add_argument('--log-level=3')  # Sets the logging level to minimal
-    chrome_options.add_argument('--headless')  # Runs Chrome in headless mode (no GUI)
-    chrome_options.add_argument('--disable-software-rasterizer')  # Disables software rasterization (if GPU is disabled)
-    chrome_options.add_argument('--no-sandbox')  # Disables sandboxing (necessary for headless mode in some cases)
-    chrome_options.add_argument('--disable-xss-auditor')  # Disable XSS auditor (can speed up page loading)
-    chrome_options.add_argument('--disable-webgl')  # Disable WebGL (Graphics acceleration)
-    chrome_options.add_argument('--disable-gl-extensions')  # Disable GL extensions (additional graphic rendering features)
-    chrome_options.page_load_strategy = 'eager'  # Speed up page loading strategy
+    chrome_options.add_argument('--disable-gpu')  
+    chrome_options.add_argument('--no-sandbox')  
+    chrome_options.add_argument('--disable-dev-shm-usage')  
+    chrome_options.add_argument('--disable-extensions')  
+    chrome_options.add_argument('--disable-logging')  
+    chrome_options.add_argument('--log-level=3')  
+    chrome_options.add_argument('--headless')  
+    chrome_options.add_argument('--disable-software-rasterizer')  
+    chrome_options.add_argument('--no-sandbox')  
+    chrome_options.add_argument('--disable-xss-auditor')  
+    chrome_options.add_argument('--disable-webgl')  
+    chrome_options.add_argument('--disable-gl-extensions')  
+    chrome_options.page_load_strategy = 'eager'  
 
     service = Service(driver_path)
     driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -58,7 +58,6 @@ def process_all_users(csv_file, driver_path, max_workers=3):
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         all_results = list(executor.map(lambda user_data: process_user(user_data, driver_path), users_list))
         
-    # Flatten results and convert to DataFrame
     flattened_results = [item for sublist in all_results for item in sublist]
     final_df = pd.DataFrame(flattened_results)
     
