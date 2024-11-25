@@ -21,7 +21,7 @@ def extract_table_data(email, table):
                 data.append({
                     "Name": columns[1].text,
                     "Course Name": columns[2].text,
-                    "Final Score (out of 100)": columns[5].text
+                    "Marks": columns[5].text
                 })
         except Exception:
             continue
