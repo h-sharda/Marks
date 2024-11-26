@@ -10,7 +10,7 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor
 
 
-def extract_table_data(email, table):
+def extract_table_data(roll_no, table):
     rows = table.find_elements(By.TAG_NAME, "tr")
     data = []
     
@@ -19,9 +19,12 @@ def extract_table_data(email, table):
             columns = row.find_elements(By.TAG_NAME, "td")
             if columns:
                 data.append({
+                    "Roll Number": roll_no,
                     "Name": columns[1].text,
                     "Course Name": columns[2].text,
-                    "Marks": columns[5].text
+                    "Assignment (25)": columns[3].text,
+                    "Exam (75)": columns[4].text,
+                    "Total (100)": columns[5].text
                 })
         except Exception:
             continue
@@ -69,7 +72,7 @@ def process_all_users(csv_file, driver_path, max_workers=3):
 
 def process_user(user_data, driver_path):
     driver = setup_driver(driver_path)
-    email, dob = user_data['email'], user_data['dob']
+    roll_no, email, dob = user_data['roll_no'], user_data['email'], user_data['dob']
     results = []
     
     try:
@@ -99,7 +102,7 @@ def process_user(user_data, driver_path):
         
         # Get results table
         table = wait.until(EC.presence_of_element_located((By.ID, "exam_score")))
-        results = extract_table_data(email, table)
+        results = extract_table_data(roll_no, table)
         
         print(f"Successfully processed {email}")
         
