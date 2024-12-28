@@ -2,3 +2,5 @@ brute.py
 data.csv
 .env
 __pycache__
+venv
+sorted_birthdays.csv
