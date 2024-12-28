@@ -51,6 +51,8 @@ def setup_driver(driver_path):
     service = Service(driver_path)
     driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.set_page_load_timeout(30)
+    driver.implicitly_wait(0.1)
+    
     return driver
 
 
