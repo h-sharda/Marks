@@ -1,7 +1,7 @@
-from functions import*
+from functions import process_all_users
 
-DRIVER_PATH = r"D:\Tools\chromedriver-win64\chromedriver.exe"
-CSV_FILE = "data.csv"
+INPUT_FILE = "data.csv"
+OUTPUT_FILE = "Result-Sem-6.csv"
 
-results = process_all_users(CSV_FILE, DRIVER_PATH, 10)
+results = process_all_users(INPUT_FILE, OUTPUT_FILE)
 print(results)
