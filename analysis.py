@@ -1,6 +1,8 @@
 import pandas as pd
 
-df = pd.read_csv("Results-Sem-6.csv")
+RESULT_FILE = "Results-Sem-6.csv"
+
+df = pd.read_csv(RESULT_FILE)
 
 average = df.groupby('Course Name')['Total (100)'].mean()
 print(average, '\n\n')
