@@ -1,6 +1,4 @@
 from selenium import webdriver
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -32,50 +30,39 @@ def extract_table_data(roll_no, table):
     return data
 
 
-def setup_driver(driver_path):
+def setup_driver():
     chrome_options = Options()
-    chrome_options.add_argument('--disable-gpu')  
-    chrome_options.add_argument('--no-sandbox')  
-    chrome_options.add_argument('--disable-dev-shm-usage')  
-    chrome_options.add_argument('--disable-extensions')  
-    chrome_options.add_argument('--disable-logging')  
-    chrome_options.add_argument('--log-level=3')  
     chrome_options.add_argument('--headless')  
-    chrome_options.add_argument('--disable-software-rasterizer')  
-    chrome_options.add_argument('--no-sandbox')  
-    chrome_options.add_argument('--disable-xss-auditor')  
-    chrome_options.add_argument('--disable-webgl')  
-    chrome_options.add_argument('--disable-gl-extensions')  
-    chrome_options.page_load_strategy = 'eager'  
-
-    service = Service(driver_path)
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    driver.set_page_load_timeout(30)
-    driver.implicitly_wait(0.1)
+    driver = webdriver.Chrome(options=chrome_options)
     
     return driver
 
 
-def process_all_users(csv_file, driver_path, max_workers=3):
-    users_df = pd.read_csv(csv_file)
+def process_all_users(input_file, output_file):
+    users_df = pd.read_csv(input_file)
     users_list = users_df.to_dict('records')
     
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        all_results = list(executor.map(lambda user_data: process_user(user_data, driver_path), users_list))
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        all_results = list(executor.map(lambda user_data: process_user(user_data), users_list))
         
     flattened_results = [item for sublist in all_results for item in sublist]
     final_df = pd.DataFrame(flattened_results)
     
     # Save results
-    final_df.to_csv("results.csv", index=False)
-    print(f"Results saved to results.csv")
+    final_df.to_csv(output_file, index=False)
+    print("\n\n------------------------------------------")
+    print("Results saved to: ", output_file)
+    print("------------------------------------------\n\n")
     return final_df
 
 
-def process_user(user_data, driver_path):
-    driver = setup_driver(driver_path)
+def process_user(user_data):
+    driver = setup_driver()
     roll_no, email, dob = user_data['roll_no'], user_data['email'], user_data['dob']
     results = []
+
+    temp = dob.split('-')
+    dob = temp[2] + '-' + temp[1] + '-' + temp[0]
     
     try:
         # Navigate and login
@@ -94,7 +81,7 @@ def process_user(user_data, driver_path):
         
         # Click results link
         results_link = wait.until(EC.element_to_be_clickable(
-            (By.LINK_TEXT, "Click to view Results: October 2024")))
+            (By.LINK_TEXT, "Click to view Results: April 2025")))
         driver.execute_script("arguments[0].click();", results_link)
         
         # Handle new window/tab
@@ -106,10 +93,10 @@ def process_user(user_data, driver_path):
         table = wait.until(EC.presence_of_element_located((By.ID, "exam_score")))
         results = extract_table_data(roll_no, table)
         
-        print(f"Successfully processed {email}")
+        print("Successfully processed ", email)
         
     except Exception as e:
-        print(f"Error processing {email}: {str(e)}")
+        print("Error processing ", email)
         
     finally:
         driver.quit()
