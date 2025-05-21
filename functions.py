@@ -46,30 +46,24 @@ def process_user(driver, user_data):
     parts = dob.split('-')
     dob = parts[2] + '-' + parts[1] + '-' + parts[0]
     
-    try:
-        # Navigate and login
-        driver.get("https://internalapp.nptel.ac.in/B2C/")
-        wait = WebDriverWait(driver, 10)
+    # Navigate and login
+    driver.get("https://internalapp.nptel.ac.in/B2C/")
+    wait = WebDriverWait(driver, 10)
 
-        email_input = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Email ID']")))
-        email_input.send_keys(email)
+    email_input = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Email ID']")))
+    email_input.send_keys(email)
 
-        password_input = driver.find_element(By.XPATH, "//input[@placeholder='Password (Format: YYYY-MM-DD)']")
-        password_input.send_keys(dob, Keys.RETURN)
+    password_input = driver.find_element(By.XPATH, "//input[@placeholder='Password (Format: YYYY-MM-DD)']")
+    password_input.send_keys(dob, Keys.RETURN)
 
-        results_link = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "Click to view Results: April 2025")))
-        driver.execute_script("arguments[0].click();", results_link)
+    results_link = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "Click to view Results: April 2025")))
+    driver.execute_script("arguments[0].click();", results_link)
 
-        wait.until(lambda d: len(d.window_handles) > 1)
-        driver.switch_to.window(driver.window_handles[-1])
+    wait.until(lambda d: len(d.window_handles) > 1)
+    driver.switch_to.window(driver.window_handles[-1])
 
-        table = wait.until(EC.presence_of_element_located((By.ID, "exam_score")))
-        results = extract_table_data(roll_no, table)
-
-        print("Successfully processed: ", email)
-
-    except Exception:
-        print("Error processing: ", email)
+    table = wait.until(EC.presence_of_element_located((By.ID, "exam_score")))
+    results = extract_table_data(roll_no, table)
 
     return results
 
@@ -77,12 +71,18 @@ def process_user(driver, user_data):
 def worker(users_chunk):
     driver = setup_driver()
     results = []
-    try:
-        for user_data in users_chunk:
+    
+    for user_data in users_chunk:
+        email = user_data['email']
+        
+        try:
             user_results = process_user(driver, user_data)
             results.extend(user_results)
-    finally:
-        driver.quit()
+            print("Successfully processed: ", email)
+        except Exception:
+            print("Error processing: ", email)
+    
+    driver.quit()
     return results
 
 
@@ -102,3 +102,11 @@ def process_all_users(input_file, output_file, max_workers=10):
     final_df.to_csv(output_file, index=False)
     print(f"\n\nResults saved to: {output_file}\n\n")
     return final_df
+
+
+if __name__ == '__main__':
+    INPUT_FILE = "data.csv"
+    OUTPUT_FILE = "Results-Sem-6.csv"
+
+    results = process_all_users(INPUT_FILE, OUTPUT_FILE)
+    print(results)
